@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import userRoutes from './routes/user';
 
 
 dotenv.config();
@@ -19,6 +20,9 @@ app.use(helmet());
 app.use(morgan("common"));
 app.use(cors({ credentials: true, origin: clientOrigin }));
 app.use(helmet.crossOriginResourcePolicy({policy: 'cross-origin'}));
+
+app.use('/user', userRoutes);
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
