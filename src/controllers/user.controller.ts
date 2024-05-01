@@ -49,3 +49,31 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Username Exists
+export const usernameExists = async (req: Request, res: Response) => {
+  try {
+    const user = await userSchema.findOne({ username: req.params.username });
+    if (!user) {
+      return res.status(404).send(false);
+    }
+
+    res.status(200).send(true);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Email Exists
+export const emailExists = async (req: Request, res: Response) => {
+  try {
+    const user = await userSchema.findOne({ email: req.params.email });
+    if (!user) {
+      return res.status(404).send(false);
+    }
+
+    res.status(200).send(true);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcrypt";
-import {isEmail} from "validator";
 import { IUser } from "../types/IUser";
+import { isEmail } from "validator";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
@@ -39,11 +39,13 @@ const userSchema = new Schema(
     name: {
       type: String,
       required: true,
+      minlength: 3,
       maxlength: 50,
     },
     surname: {
       type: String,
       required: true,
+      minlength: 3,
       maxlength: 50,
     },
     avatar: {
@@ -52,6 +54,7 @@ const userSchema = new Schema(
     },
     about: {
       type: String,
+      default: "No info",
       maxlength: 2500,
     },
     location: {
@@ -64,7 +67,6 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
-
 
 userSchema.index({ email: 1, username: 1 });
 
