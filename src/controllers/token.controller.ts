@@ -1,6 +1,4 @@
-import userSchema from "../schemas/user.schema";
-import { IAuthReq } from "../types/IAuthReq";
-import { Response } from "express";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 //  Generate Tokens
@@ -35,32 +33,27 @@ export const generateAccessToken = (userId: string) => {
 };
 
 // Update Access Token with Refresh Token
-export const updateAccessToken = async (req: IAuthReq, res: Response) => {
+export const updateAccessToken = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?._id;
     const refreshToken = req.headers["x-refresh-token"];
+    console.log(refreshToken);
 
-    if (!userId || !refreshToken) {
+    if (!refreshToken) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const user = await userSchema.findOne({ _id: userId });
+    try {
+      const decodedToken = jwt.verify(
+        refreshToken as string,
+        process.env.JWT_REFRESH_TOKEN_SECRET!
+      ) as IDecoded;
 
-    if (!user) {
+      const accessToken = generateAccessToken(decodedToken._id);
+
+      return res.status(200).json(accessToken);
+    } catch (error) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
-    const decodedToken = jwt.verify(
-      refreshToken as string,
-      process.env.JWT_REFRESH_TOKEN_SECRET!
-    ) as IDecoded;
-
-    if (decodedToken._id !== userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    const accessToken = generateAccessToken(userId);
-    return res.status(200).json(accessToken);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

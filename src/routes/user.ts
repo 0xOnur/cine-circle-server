@@ -5,12 +5,11 @@ import {
   loginUser,
   usernameExists,
 } from "../controllers/user.controller";
-import tokenMiddleware from "../middlewares/token.middleware";
 import { updateAccessToken } from "../controllers/token.controller";
 
 const userRoutes = express.Router();
 
-userRoutes.post("/update-token", tokenMiddleware, updateAccessToken);
+userRoutes.post("/update-token", updateAccessToken);
 
 userRoutes.post("/login", loginUser);
 userRoutes.post("/register", createUser);
