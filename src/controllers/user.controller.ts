@@ -8,10 +8,10 @@ export const createUser = async (req: Request, res: Response) => {
   try {
     const user = new userSchema({
       username: req.body.username,
-      email: req.body.email,
-      password: req.body.password,
       name: req.body.name,
       surname: req.body.surname,
+      email: req.body.email,
+      password: req.body.password,
     });
 
     await user.validate();
@@ -40,7 +40,7 @@ export const loginUser = async (req: Request, res: Response) => {
     const isMatch = await bcrypt.compare(req.body.password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid Password" });
     }
 
     const tokens = generateToken(user._id);
