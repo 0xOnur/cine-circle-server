@@ -36,7 +36,6 @@ export const generateAccessToken = (userId: string) => {
 export const updateAccessToken = async (req: Request, res: Response) => {
   try {
     const refreshToken = req.headers["x-refresh-token"];
-    console.log(refreshToken);
 
     if (!refreshToken) {
       return res.status(401).json({ message: "Unauthorized" });

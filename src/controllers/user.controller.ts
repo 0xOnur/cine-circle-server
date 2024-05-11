@@ -14,6 +14,17 @@ export const createUser = async (req: Request, res: Response) => {
       password: req.body.password,
     });
 
+    //  username and email available
+    const username = await userSchema.findOne({ username: req.body.username });
+    const email = await userSchema.findOne({ email: req.body.email });
+
+    if (username) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+    if (email) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
     await user.validate();
 
     await user.save();
@@ -49,6 +60,7 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Username Exists
 export const usernameExists = async (req: Request, res: Response) => {
