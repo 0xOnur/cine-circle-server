@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { IUser } from "../types/IUser";
 import { isEmail } from "validator";
 import bcrypt from "bcrypt";
+import watchListItemSchema from "./watchlist.item.schema";
 
 const userSchema = new Schema(
   {
@@ -31,6 +32,7 @@ const userSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    watchlist: [watchListItemSchema],
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -54,7 +56,6 @@ const userSchema = new Schema(
     },
     about: {
       type: String,
-      default: "No info",
       maxlength: 2500,
     },
     location: {

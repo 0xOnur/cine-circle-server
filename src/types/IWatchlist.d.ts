@@ -1,8 +1,5 @@
-interface IWatchlist extends Document {
-  userId: IObjectId;
-  listName: string;
-  shows: IShowItem[];
-  itemCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+interface IWatchlist {
+  type: "tv" | "movie";
+  tmdbID: string;
+  dateAdded: Date;
 }
