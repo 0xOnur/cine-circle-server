@@ -3,6 +3,7 @@ import {
   addToWatchlist,
   createUser,
   emailExists,
+  getUserLists,
   getUser,
   getUserWatchlist,
   loginUser,
@@ -22,6 +23,8 @@ userRoutes.post("/register", createUser);
 userRoutes.get("/get-watchlist", getUserWatchlist);
 userRoutes.post("/add-watchlist", tokenMiddleware, addToWatchlist);
 userRoutes.delete("/remove-watchlist", tokenMiddleware, removeFromWatchlist);
+
+userRoutes.get("/get-lists", getUserLists)
 
 userRoutes.get("/username-exists/:username", usernameExists);
 userRoutes.get("/email-exists/:email", emailExists);

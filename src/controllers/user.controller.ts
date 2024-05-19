@@ -5,6 +5,7 @@ import { generateToken } from "./token.controller";
 import bcrypt from "bcrypt";
 import { IAuthReq } from "../types/IAuthReq";
 import watchlistSchema from "../schemas/watchlist.schema";
+import listSchema from "../schemas/list.schema";
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
@@ -207,6 +208,28 @@ export const removeFromWatchlist = async (req: IAuthReq, res: Response) => {
     await watchlist.save();
 
     res.status(200).json(watchlist);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get Lists
+export const getUserLists = async (req: Request, res: Response) => {
+  try {
+    const username = String(req.query.username);
+    const user = await userSchema
+      .findOne({ username: username })
+      .select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const lists = await listSchema
+      .find({ userId: user._id })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(lists);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
