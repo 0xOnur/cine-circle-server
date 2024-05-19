@@ -2,9 +2,10 @@ import mongoose, { Schema } from "mongoose";
 import { IUser } from "../types/IUser";
 import { isEmail } from "validator";
 import bcrypt from "bcrypt";
-import watchListItemSchema from "./watchlist.item.schema";
+import watchListItemSchema from "./watchlist.schema";
+import watchlistSchema from "./watchlist.schema";
 
-const userSchema = new Schema(
+const userSchema = new Schema<IUser>(
   {
     username: {
       type: String,
@@ -32,7 +33,6 @@ const userSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    watchlist: [watchListItemSchema],
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -76,6 +76,12 @@ userSchema.pre("save", async function (next) {
 
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 10);
+  }
+
+  if (user.isNew) {
+    // Yeni kullanıcı oluşturulurken watchlist belgesi oluşturuyoruz
+    const watchlist = new watchlistSchema({ userId: user._id, items: [] });
+    await watchlist.save();
   }
 
   next();

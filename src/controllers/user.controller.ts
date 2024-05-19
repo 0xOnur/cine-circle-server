@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import userSchema from "../schemas/user.schema";
+import watchListItemSchema from "../schemas/watchlist.schema";
 import { generateToken } from "./token.controller";
 import bcrypt from "bcrypt";
+import { IAuthReq } from "../types/IAuthReq";
+import watchlistSchema from "../schemas/watchlist.schema";
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
@@ -29,8 +32,12 @@ export const createUser = async (req: Request, res: Response) => {
 
     await user.save();
 
+    user.password = "";
+
+    const watchlist = await watchlistSchema.findOne({ userId: user._id });
+
     const tokens = generateToken(user._id);
-    res.status(201).json({ user, tokens });
+    res.status(201).json({ user, tokens, watchlist });
   } catch (error: any) {
     if (error.name === "ValidationError") {
       res.status(400).json({ message: "Validation failed" });
@@ -53,14 +60,16 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid Password" });
     }
+    user.password = "";
+
+    const watchlist = await watchlistSchema.findOne({ userId: user._id });
 
     const tokens = generateToken(user._id);
-    res.status(200).json({ user, tokens });
+    res.status(200).json({ user, tokens, watchlist });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Username Exists
 export const usernameExists = async (req: Request, res: Response) => {
@@ -85,6 +94,119 @@ export const emailExists = async (req: Request, res: Response) => {
     }
 
     res.status(200).send(true);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get User
+export const getUser = async (req: Request, res: Response) => {
+  try {
+    const username = String(req.query.username);
+
+    const user = await userSchema
+      .findOne({ username: username })
+      .select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get User Watchlist
+export const getUserWatchlist = async (req: Request, res: Response) => {
+  try {
+    const username = String(req.query.username);
+    const user = await userSchema
+      .findOne({ username: username })
+      .select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const watchlist = await watchlistSchema.findOne({ userId: user._id });
+
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+
+    res.status(200).json(watchlist);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Add media to watchlist
+export const addToWatchlist = async (req: IAuthReq, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const tmdbID = String(req.query.tmdbID);
+    const mediaType =
+      req.query.mediaType === "tv" || req.query.mediaType === "movie"
+        ? req.query.mediaType
+        : null;
+
+    if (!mediaType) {
+      return res.status(400).json({ message: "Invalid media type" });
+    }
+
+    let watchlist = await watchlistSchema.findOne({ userId });
+
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+
+    const watchlistItemIndex = watchlist.items.findIndex(
+      (item) => item.tmdbID === tmdbID
+    );
+    if (watchlistItemIndex !== -1) {
+      return res.status(400).json({ message: "Item already in watchlist" });
+    }
+
+    const watchlistItem = {
+      mediaType: mediaType as "tv" | "movie",
+      tmdbID,
+      dateAdded: new Date(),
+    };
+
+    watchlist.items.push(watchlistItem);
+    await watchlist.save();
+
+    res.status(200).json(watchlist);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Remove media from watchlist
+export const removeFromWatchlist = async (req: IAuthReq, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const tmdbID = String(req.query.tmdbID);
+
+    const watchlist = await watchlistSchema.findOne({ userId });
+
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+
+    const watchlistItemIndex = watchlist.items.findIndex(
+      (item) => item.tmdbID === tmdbID
+    );
+
+    if (watchlistItemIndex === -1) {
+      return res.status(404).json({ message: "Item not found in watchlist" });
+    }
+
+    watchlist.items.splice(watchlistItemIndex, 1);
+    await watchlist.save();
+
+    res.status(200).json(watchlist);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

@@ -5,7 +5,6 @@ interface IUser extends Document {
   email: string;
   password: string;
   isActive: boolean;
-  watchlist: IWatchlist;
   role: string;
   name: string;
   surname: string;
