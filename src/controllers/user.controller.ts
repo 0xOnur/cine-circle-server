@@ -234,3 +234,24 @@ export const getUserLists = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Create List
+export const createList = async (req: IAuthReq, res: Response) => {
+  try {
+    const userId = req.user?._id;
+
+    const list = new listSchema({
+      userId,
+      listName: String(req.query.listName),
+      listType: String(req.query.listType),
+      description: String(req.body.description),
+    });
+
+    await list.validate();
+    await list.save();
+
+    res.status(200).json(list);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};

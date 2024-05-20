@@ -9,6 +9,7 @@ import {
   loginUser,
   removeFromWatchlist,
   usernameExists,
+  createList,
 } from "../controllers/user.controller";
 import { updateAccessToken } from "../controllers/token.controller";
 import tokenMiddleware from "../middlewares/token.middleware";
@@ -24,7 +25,8 @@ userRoutes.get("/get-watchlist", getUserWatchlist);
 userRoutes.post("/add-watchlist", tokenMiddleware, addToWatchlist);
 userRoutes.delete("/remove-watchlist", tokenMiddleware, removeFromWatchlist);
 
-userRoutes.get("/get-lists", getUserLists)
+userRoutes.get("/get-lists", getUserLists);
+userRoutes.post("/create-list", tokenMiddleware, createList);
 
 userRoutes.get("/username-exists/:username", usernameExists);
 userRoutes.get("/email-exists/:email", emailExists);

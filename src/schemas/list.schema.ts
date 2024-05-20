@@ -33,18 +33,22 @@ const listSchema = new Schema(
       type: String,
       required: true,
       minlength: 3,
+      maxlength: 100,
     },
     description: {
       type: String,
       minlength: 3,
       maxlength: 2500,
     },
+    listType: {
+      type: String,
+      enum: ["tv", "movie"],
+      required: true,
+    },
     media: [mediaItemSchema],
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
 
