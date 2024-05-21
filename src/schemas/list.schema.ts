@@ -43,7 +43,7 @@ const listSchema = new Schema<IList>(
       enum: ["tv", "movie"],
       required: true,
     },
-    media: [mediaItemSchema],
+    medias: [mediaItemSchema],
   },
   {
     timestamps: true,

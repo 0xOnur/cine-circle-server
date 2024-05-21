@@ -53,8 +53,8 @@ export const addToList = async (req: IAuthReq, res: Response) => {
     const listId = String(req.query.listId);
     const tmdbID = String(req.query.tmdbID);
     const mediaType =
-      req.query.mediaType === "tv" || req.query.mediaType === "movie"
-        ? req.query.mediaType
+      req.body.mediaType === "tv" || req.body.mediaType === "movie"
+        ? req.body.mediaType
         : null;
 
     if (!mediaType) {
@@ -67,12 +67,54 @@ export const addToList = async (req: IAuthReq, res: Response) => {
       return res.status(404).json({ message: "List not found" });
     }
 
-    const listItemIndex = list.media.findIndex(
+    const listItemIndex = list.medias.findIndex(
       (item) => item.tmdbID === tmdbID
     );
     if (listItemIndex !== -1) {
       return res.status(400).json({ message: "Item already in list" });
     }
+
+    const mediaItem = {
+      tmdbID: tmdbID,
+
+      mediaType: mediaType,
+      dateAdded: new Date(),
+    };
+
+    list.medias.push(mediaItem);
+
+    await list.save();
+
+    res.status(200).json(list);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Remove from List
+export const removeFromList = async (req: IAuthReq, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const listId = String(req.query.listId);
+    const tmdbID = String(req.query.tmdbID);
+
+    const list = await listSchema.findOne({ _id: listId, userId });
+
+    if (!list) {
+      return res.status(404).json({ message: "List not found" });
+    }
+
+    const index = list.medias.findIndex((item) => item.tmdbID === tmdbID);
+
+    if (index === -1) {
+      return res.status(400).json({ message: "Item not found in list" });
+    }
+
+    list.medias.splice(index, 1);
+
+    await list.save();
+
+    res.status(200).json(list);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

@@ -6,7 +6,7 @@ interface IList extends Document {
     type: string;
     enum: ["tv", "movie"];
   };
-  media: IMedia[];
+  medias: IMedia[];
   createdAt: Date;
   updatedAt: Date;
 }
