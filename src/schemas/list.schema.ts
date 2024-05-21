@@ -1,9 +1,8 @@
 import mongoose, { Schema } from "mongoose";
-import { IList } from "../types/IList";
 
-const mediaItemSchema = new Schema(
+const mediaItemSchema = new Schema<IMedia>(
   {
-    type: {
+    mediaType: {
       type: String,
       enum: ["tv", "movie"],
       required: true,
@@ -22,7 +21,7 @@ const mediaItemSchema = new Schema(
   }
 );
 
-const listSchema = new Schema(
+const listSchema = new Schema<IList>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -37,8 +36,7 @@ const listSchema = new Schema(
     },
     description: {
       type: String,
-      minlength: 3,
-      maxlength: 2500,
+      maxlength: 1000,
     },
     listType: {
       type: String,

@@ -1,14 +1,12 @@
-import { Document } from "mongoose";
-
 interface IList extends Document {
-  userId: string;
+  userId: IObjectId;
   listName: string;
   description: string;
   listType: {
     type: string;
     enum: ["tv", "movie"];
   };
-  media: string[];
+  media: IMedia[];
   createdAt: Date;
   updatedAt: Date;
 }
