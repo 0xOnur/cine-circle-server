@@ -1,8 +1,8 @@
 interface IReview {
   userId: IObjectId;
-  showId: number;
+  tmdbID: number;
   rating: number;
-  review: string;
+  comment: string;
   createdAt: Date;
   updatedAt: Date;
 }

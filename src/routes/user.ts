@@ -5,6 +5,7 @@ import {
   getUser,
   loginUser,
   usernameExists,
+  getUserActivity
 } from "../controllers/user.controller";
 import { updateAccessToken } from "../controllers/token.controller";
 
@@ -19,5 +20,6 @@ userRoutes.get("/username-exists/:username", usernameExists);
 userRoutes.get("/email-exists/:email", emailExists);
 
 userRoutes.get("/get-user", getUser);
+userRoutes.get("/get-user-activity", getUserActivity);
 
 export default userRoutes;

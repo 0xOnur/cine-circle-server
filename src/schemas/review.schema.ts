@@ -1,13 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
-const reviewSchema = new Schema(
+const reviewSchema = new Schema<IReview>(
   {
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    showId: {
+    tmdbID: {
       type: Number,
       required: true,
     },
@@ -17,7 +17,7 @@ const reviewSchema = new Schema(
       min: 0,
       max: 10,
     },
-    review: {
+    comment: {
       type: String,
       required: true,
       minlength: 10,
@@ -29,6 +29,6 @@ const reviewSchema = new Schema(
   }
 );
 
-reviewSchema.index({ userId: 1, showId: 1 }, { unique: true });
+reviewSchema.index({ userId: 1, tmdbID: 1 }, { unique: true });
 
 export default mongoose.model<IReview>("Review", reviewSchema);
