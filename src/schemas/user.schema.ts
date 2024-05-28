@@ -52,7 +52,7 @@ const userSchema = new Schema<IUser>(
     },
     avatar: {
       type: String,
-      default: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+      default: "https://res.cloudinary.com/dwcw9iftp/image/upload/v1716921657/CineCircle/Users/Avatar/default-avatar.png",
     },
     about: {
       type: String,
