@@ -9,6 +9,7 @@ interface IUser extends Document {
   name: string;
   surname: string;
   avatar: string;
+  avatarId: string;
   about: string;
   location: string;
   createdAt: Date;

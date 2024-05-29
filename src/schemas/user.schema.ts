@@ -54,6 +54,9 @@ const userSchema = new Schema<IUser>(
       type: String,
       default: "https://res.cloudinary.com/dwcw9iftp/image/upload/v1716921657/CineCircle/Users/Avatar/default-avatar.png",
     },
+    avatarId: {
+      type: String,
+    },
     about: {
       type: String,
       maxlength: 2500,

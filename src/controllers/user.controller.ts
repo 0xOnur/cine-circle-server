@@ -3,6 +3,8 @@ import userSchema from "../schemas/user.schema";
 import { generateToken } from "./token.controller";
 import bcrypt from "bcrypt";
 import getWatchlist from "../helpers/get.watchlist";
+import { IAuthReq } from "../types/IAuthReq";
+import { deleteAvatar, uploadAvatar } from "../services/cloudinary";
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
@@ -12,6 +14,8 @@ export const createUser = async (req: Request, res: Response) => {
       name: req.body.name,
       surname: req.body.surname,
       email: req.body.email,
+      location: req.body.location,
+      about: req.body.about,
       password: req.body.password,
     });
 
@@ -110,6 +114,50 @@ export const getUser = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
     res.status(200).json(user);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update User
+export const updateUser = async (req: IAuthReq, res: Response) => {
+  try {
+    const user = await userSchema.findById(req.user?._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newUserData = {
+      avatar: user.avatar,
+      avatarId: user.avatarId,
+      name: req.body.name || user.name,
+      surname: req.body.surname || user.surname,
+      location: req.body.location || user.location,
+      about: req.body.about || user.about,
+    };
+
+    if (req.files) {
+      const avatar = (req.files as Express.Multer.File[])[0];
+
+      if (avatar) {
+        if (user.avatarId) {
+          await deleteAvatar(user.avatarId);
+        }
+
+        const newAvatar = await uploadAvatar({
+          file: avatar,
+          username: user.username,
+        });
+
+        newUserData.avatar = newAvatar.url;
+        newUserData.avatarId = newAvatar.public_id;
+      }
+    }
+
+    Object.assign(user, newUserData);
+    await user.save();
+
+    res.status(200).json({ message: "User updated successfully" });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
