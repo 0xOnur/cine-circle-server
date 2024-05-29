@@ -8,6 +8,7 @@ import morgan from "morgan";
 import userRoutes from "./routes/user";
 import watchlistRoutes from "./routes/watchlist";
 import listRoutes from "./routes/list";
+import reviewRoutes from "./routes/review";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use("/user", userRoutes);
 app.use("/watchlist", watchlistRoutes);
 app.use("/list", listRoutes);
+app.use("/review", reviewRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

@@ -6,7 +6,7 @@ const getReviews = async (userId: string) => {
       return;
     }
 
-    const reviews = await reviewSchema.find({ userId });
+    const reviews = await reviewSchema.find({ userId }).sort({ createdAt: -1 });
 
     return reviews;
   } catch (error) {

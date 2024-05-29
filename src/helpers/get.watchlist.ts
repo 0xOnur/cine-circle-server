@@ -9,6 +9,7 @@ const getWatchlist = async (userId: string) => {
     const exist = await watchlistSchema.findOne({ userId });
 
     if (exist) {
+      exist.medias.sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime());
       return exist;
     }
 

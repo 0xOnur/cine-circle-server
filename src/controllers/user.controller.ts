@@ -3,8 +3,6 @@ import userSchema from "../schemas/user.schema";
 import { generateToken } from "./token.controller";
 import bcrypt from "bcrypt";
 import getWatchlist from "../helpers/get.watchlist";
-import getLists from "../helpers/get.lists";
-import getReviews from "../helpers/get.reviews";
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
@@ -112,34 +110,6 @@ export const getUser = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
     res.status(200).json(user);
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Get User Activity
-export const getUserActivity = async (req: Request, res: Response) => {
-  try {
-    const username = String(req.query.username);
-    const user = await userSchema
-      .findOne({ username: username })
-      .select("-password");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const watchlist = await getWatchlist(user._id);
-    const lists = await getLists(user._id);
-    const reviews = await getReviews(user._id);
-
-    const activity = {
-      watchlist,
-      lists,
-      reviews,
-    };
-
-    res.status(200).json(activity);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

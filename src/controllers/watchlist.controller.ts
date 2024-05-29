@@ -8,9 +8,7 @@ import getWatchlist from "../helpers/get.watchlist";
 export const getUserWatchlist = async (req: Request, res: Response) => {
   try {
     const username = String(req.query.username);
-    const user = await userSchema
-      .findOne({ username: username })
-      .select("-password");
+    const user = await userSchema.findOne({ username: username });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

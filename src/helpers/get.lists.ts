@@ -6,7 +6,10 @@ const getLists = async (userId: string) => {
       return;
     }
 
-    const lists = await listSchema.find({ user: userId });
+    // find lists and sort them by updatedAt
+    const lists = await listSchema
+      .find({ userId: userId })
+      .sort({ updatedAt: -1 });
 
     return lists;
   } catch (error) {

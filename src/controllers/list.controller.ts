@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import userSchema from "../schemas/user.schema";
 import listSchema from "../schemas/list.schema";
 import { IAuthReq } from "../types/IAuthReq";
+import getLists from "../helpers/get.lists";
 
 // Get Lists
 export const getUserLists = async (req: Request, res: Response) => {
@@ -15,9 +16,7 @@ export const getUserLists = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const lists = await listSchema
-      .find({ userId: user._id })
-      .sort({ createdAt: -1 });
+    const lists = await getLists(user._id);
 
     res.status(200).json(lists);
   } catch (error: any) {
