@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
 import userSchema from "../schemas/user.schema";
-import watchlistSchema from "../schemas/watchlist.schema";
 import { IAuthReq } from "../types/IAuthReq";
-import getWatchlist from "../helpers/get.watchlist";
+import {
+  addMediaToWatchlist,
+  isMediaInWatchlist,
+  removeMediaFromWatchlist,
+  userWatchlist,
+  validateWatchlistRequest,
+} from "../helpers/watchlist.helper";
 
 // Get User Watchlist
 export const getUserWatchlist = async (req: Request, res: Response) => {
@@ -14,7 +19,7 @@ export const getUserWatchlist = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const watchlist = await getWatchlist(user._id);
+    const watchlist = await userWatchlist(user._id);
 
     res.status(200).json(watchlist);
   } catch (error: any) {
@@ -25,27 +30,21 @@ export const getUserWatchlist = async (req: Request, res: Response) => {
 // Add media to watchlist
 export const addToWatchlist = async (req: IAuthReq, res: Response) => {
   try {
-    const userId = req.user?._id;
-    const tmdbID = String(req.query.tmdbID);
-    const mediaType: "tv" | "movie" = req.query.mediaType as "tv" | "movie";
+    const { userId, tmdbID, mediaType } = validateWatchlistRequest(req);
 
-    if (!userId || !tmdbID || !mediaType) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!mediaType) {
+      return res
+        .status(400)
+        .json({ message: "Media type is required for adding to watchlist" });
     }
 
-    if (!mediaType || (mediaType !== "tv" && mediaType !== "movie")) {
-      return res.status(400).json({ message: "Invalid media type" });
-    }
-
-    const watchlist = await getWatchlist(userId);
+    const watchlist = await userWatchlist(userId);
 
     if (!watchlist) {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    const mediaIds = watchlist.medias.map((item) => item.tmdbID);
-
-    if (mediaIds.includes(tmdbID)) {
+    if (isMediaInWatchlist(watchlist, tmdbID)) {
       return res.status(400).json({ message: "Item already in watchlist" });
     }
 
@@ -55,11 +54,9 @@ export const addToWatchlist = async (req: IAuthReq, res: Response) => {
       dateAdded: new Date(),
     };
 
-    watchlist.medias.push(mediaItem);
+    const updatedWatchlist = await addMediaToWatchlist(watchlist, mediaItem);
 
-    await watchlist.save();
-
-    res.status(200).json(watchlist);
+    res.status(200).json(updatedWatchlist);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -68,31 +65,17 @@ export const addToWatchlist = async (req: IAuthReq, res: Response) => {
 // Remove media from watchlist
 export const removeFromWatchlist = async (req: IAuthReq, res: Response) => {
   try {
-    const userId = req.user?._id;
-    const tmdbID = String(req.query.tmdbID);
+    const { userId, tmdbID } = validateWatchlistRequest(req);
 
-    if (!userId || !tmdbID) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    const watchlist = await getWatchlist(userId);
+    const watchlist = await userWatchlist(userId);
 
     if (!watchlist) {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    const mediaIds = watchlist.medias.map((item) => item.tmdbID);
-    const index = mediaIds.indexOf(tmdbID);
+    const updatedWatchlist = await removeMediaFromWatchlist(watchlist, tmdbID);
 
-    if (index === -1) {
-      return res.status(400).json({ message: "Item not found in watchlist" });
-    }
-
-    watchlist.medias.splice(index, 1);
-
-    await watchlist.save();
-
-    res.status(200).json(watchlist);
+    res.status(200).json(updatedWatchlist);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

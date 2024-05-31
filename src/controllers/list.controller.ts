@@ -2,15 +2,25 @@ import { Request, Response } from "express";
 import userSchema from "../schemas/user.schema";
 import listSchema from "../schemas/list.schema";
 import { IAuthReq } from "../types/IAuthReq";
-import getLists from "../helpers/get.lists";
+import {
+  addMediaToList,
+  createNewList,
+  findListById,
+  getLists,
+  removeMediaFromList,
+  validateListRequest,
+} from "../helpers/list.helper";
 
 // Get Lists
 export const getUserLists = async (req: Request, res: Response) => {
   try {
-    const username = String(req.query.username);
-    const user = await userSchema
-      .findOne({ username: username })
-      .select("-password");
+    const { username } = validateListRequest(req);
+
+    if (!username) {
+      return res.status(400).json({ message: "Username is required" });
+    }
+
+    const user = await userSchema.findOne({ username }).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -27,17 +37,17 @@ export const getUserLists = async (req: Request, res: Response) => {
 // Create List
 export const createList = async (req: IAuthReq, res: Response) => {
   try {
-    const userId = req.user?._id;
+    const { userId, listName, listType, description } =
+      validateListRequest(req);
 
-    const list = new listSchema({
+    const listData = new listSchema({
       userId,
-      listName: String(req.query.listName),
-      listType: String(req.query.listType),
-      description: String(req.body.description),
+      listName,
+      listType,
+      description,
     });
 
-    await list.validate();
-    await list.save();
+    const list = await createNewList(listData);
 
     res.status(200).json(list);
   } catch (error: any) {
@@ -48,43 +58,24 @@ export const createList = async (req: IAuthReq, res: Response) => {
 // Add to List
 export const addToList = async (req: IAuthReq, res: Response) => {
   try {
-    const userId = req.user?._id;
-    const listId = String(req.query.listId);
-    const tmdbID = String(req.query.tmdbID);
-    const mediaType =
-      req.body.mediaType === "tv" || req.body.mediaType === "movie"
-        ? req.body.mediaType
-        : null;
+    const { userId, listId, tmdbID, mediaType } = validateListRequest(req);
 
-    if (!mediaType) {
-      return res.status(400).json({ message: "Invalid media type" });
+    if (!listId || !tmdbID || !mediaType) {
+      return res
+        .status(400)
+        .json({ message: "List ID, TMDB ID, and media type are required" });
     }
 
-    const list = await listSchema.findOne({ _id: listId, userId });
+    const list = await findListById(listId, userId!);
 
     if (!list) {
       return res.status(404).json({ message: "List not found" });
     }
 
-    const listItemIndex = list.medias.findIndex(
-      (item) => item.tmdbID === tmdbID
-    );
-    if (listItemIndex !== -1) {
-      return res.status(400).json({ message: "Item already in list" });
-    }
+    const mediaItem = { tmdbID, mediaType, dateAdded: new Date() };
+    const updatedList = await addMediaToList(list, mediaItem);
 
-    const mediaItem = {
-      tmdbID: tmdbID,
-
-      mediaType: mediaType,
-      dateAdded: new Date(),
-    };
-
-    list.medias.push(mediaItem);
-
-    await list.save();
-
-    res.status(200).json(list);
+    res.status(200).json(updatedList);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -93,27 +84,23 @@ export const addToList = async (req: IAuthReq, res: Response) => {
 // Remove from List
 export const removeFromList = async (req: IAuthReq, res: Response) => {
   try {
-    const userId = req.user?._id;
-    const listId = String(req.query.listId);
-    const tmdbID = String(req.query.tmdbID);
+    const { userId, listId, tmdbID } = validateListRequest(req);
 
-    const list = await listSchema.findOne({ _id: listId, userId });
+    if (!listId || !tmdbID) {
+      return res
+        .status(400)
+        .json({ message: "List ID and TMDB ID are required" });
+    }
+
+    const list = await findListById(listId, userId!);
 
     if (!list) {
       return res.status(404).json({ message: "List not found" });
     }
 
-    const index = list.medias.findIndex((item) => item.tmdbID === tmdbID);
+    const updatedList = await removeMediaFromList(list, tmdbID);
 
-    if (index === -1) {
-      return res.status(400).json({ message: "Item not found in list" });
-    }
-
-    list.medias.splice(index, 1);
-
-    await list.save();
-
-    res.status(200).json(list);
+    res.status(200).json(updatedList);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

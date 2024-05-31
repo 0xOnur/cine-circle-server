@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import userSchema from "../schemas/user.schema";
 import { generateToken } from "./token.controller";
 import bcrypt from "bcrypt";
-import getWatchlist from "../helpers/get.watchlist";
 import { IAuthReq } from "../types/IAuthReq";
 import { deleteAvatar, uploadAvatar } from "../services/cloudinary";
+import { userWatchlist } from "../helpers/watchlist.helper";
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
@@ -36,7 +36,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     user.password = "";
 
-    const watchlist = await getWatchlist(user._id);
+    const watchlist = await userWatchlist(user._id);
 
     const tokens = generateToken(user._id);
     res.status(201).json({ user, tokens, watchlist });
@@ -64,7 +64,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
     user.password = "";
 
-    const watchlist = await getWatchlist(user._id);
+    const watchlist = await userWatchlist(user._id);
 
     const tokens = generateToken(user._id);
     res.status(200).json({ user, tokens, watchlist });
