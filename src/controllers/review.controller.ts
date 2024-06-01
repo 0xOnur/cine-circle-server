@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
   createReviewHelper,
+  deleteReviewHelper,
   getMediaReviewsHelper,
   getUserMediaReviewHelper,
   getUserReviewsHelper,
@@ -100,6 +101,23 @@ export const updateReview = async (req: IAuthReq, res: Response) => {
     );
 
     res.status(200).json(updatedReview);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete Review
+export const deleteReview = async (req: IAuthReq, res: Response) => {
+  try {
+    const { userId, tmdbID } = validateReviewRequest(req);
+
+    const result = await deleteReviewHelper(userId, tmdbID);
+
+    if (!result) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    res.status(200).json({ message: "Review deleted successfully" });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

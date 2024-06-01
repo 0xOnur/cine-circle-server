@@ -91,3 +91,15 @@ export const updateReviewHelper = async (
 
   return updatedReview;
 };
+
+export const deleteReviewHelper = async (userId: string, tmdbID: string) => {
+  const deletedReview = await reviewSchema.findOneAndDelete({
+    userId,
+    tmdbID,
+  });
+  if (!deletedReview) {
+    throw new Error("Review not found");
+  }
+
+  return deletedReview;
+};

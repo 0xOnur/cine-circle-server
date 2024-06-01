@@ -5,6 +5,7 @@ import {
   getUserMediaReview,
   createReview,
   updateReview,
+  deleteReview
 } from "../controllers/review.controller";
 import tokenMiddleware from "../middlewares/token.middleware";
 
@@ -16,5 +17,7 @@ reviewRoutes.get("/get-user-media-review", getUserMediaReview);
 
 reviewRoutes.post("/create-review", tokenMiddleware, createReview);
 reviewRoutes.put("/update-review", tokenMiddleware, updateReview);
+reviewRoutes.delete("/delete-review", tokenMiddleware, deleteReview);
+
 
 export default reviewRoutes;
