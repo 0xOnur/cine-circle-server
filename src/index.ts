@@ -9,6 +9,7 @@ import userRoutes from "./routes/user";
 import watchlistRoutes from "./routes/watchlist";
 import listRoutes from "./routes/list";
 import reviewRoutes from "./routes/review";
+import ratingRoutes from "./routes/rating";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/user", userRoutes);
 app.use("/watchlist", watchlistRoutes);
 app.use("/list", listRoutes);
 app.use("/review", reviewRoutes);
+app.use("/rating", ratingRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

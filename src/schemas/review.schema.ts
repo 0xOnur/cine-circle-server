@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 const reviewSchema = new Schema<IReview>(
   {
@@ -11,17 +11,26 @@ const reviewSchema = new Schema<IReview>(
       type: Number,
       required: true,
     },
-    rating: {
-      type: Number,
+    mediaType: {
+      type: String,
+      enum: ["movie", "tv"],
       required: true,
-      min: 0,
-      max: 10,
+    },
+    title: {
+      type: String,
+      required: true,
+      minlength: 5,
+      maxlength: 100,
     },
     comment: {
       type: String,
       required: true,
       minlength: 10,
       maxlength: 1000,
+    },
+    spoiler: {
+      type: Boolean,
+      default: false,
     },
   },
   {

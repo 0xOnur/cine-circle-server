@@ -1,29 +1,20 @@
 import { Request, Response } from "express";
-import userSchema from "../schemas/user.schema";
 import {
+  createReviewHelper,
   getMediaReviewsHelper,
+  getUserMediaReviewHelper,
   getUserReviewsHelper,
+  updateReviewHelper,
   validateReviewRequest,
 } from "../helpers/review.helper";
+import { IAuthReq } from "../types/IAuthReq";
 
 // Get Reviews
 export const getUserReviews = async (req: Request, res: Response) => {
   try {
     const { username } = validateReviewRequest(req);
 
-    if (!username) {
-      return res.status(400).json({ message: "Username is required" });
-    }
-
-    const user = await userSchema
-      .findOne({ username: username })
-      .select("-password");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const reviews = await getUserReviewsHelper(user._id);
+    const reviews = await getUserReviewsHelper(username);
 
     res.status(200).json(reviews);
   } catch (error: any) {
@@ -35,7 +26,6 @@ export const getUserReviews = async (req: Request, res: Response) => {
 export const getMediaReviews = async (req: Request, res: Response) => {
   try {
     const { tmdbID } = validateReviewRequest(req);
-    console.log("🚀 ~ getMediaReviews ~ tmdbID:", tmdbID)
 
     if (!tmdbID) {
       return res.status(400).json({ message: "TMDB ID is required" });
@@ -44,6 +34,72 @@ export const getMediaReviews = async (req: Request, res: Response) => {
     const reviews = await getMediaReviewsHelper(tmdbID);
 
     res.status(200).json(reviews);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get User Media Review
+export const getUserMediaReview = async (req: Request, res: Response) => {
+  try {
+    const { username, tmdbID } = validateReviewRequest(req);
+
+    const review = await getUserMediaReviewHelper(username, tmdbID);
+
+    res.status(200).json(review);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Create Review
+export const createReview = async (req: IAuthReq, res: Response) => {
+  try {
+    const { userId, tmdbID } = validateReviewRequest(req);
+    const { mediaType, title, comment, spoiler } = req.body;
+
+    if (!mediaType || !title || !comment) {
+      return res
+        .status(400)
+        .json({ message: "Title comment and media type are required" });
+    }
+
+    const newReview = await createReviewHelper(
+      userId,
+      tmdbID,
+      mediaType,
+      title,
+      comment,
+      spoiler
+    );
+
+    res.status(201).json(newReview);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update Review
+export const updateReview = async (req: IAuthReq, res: Response) => {
+  try {
+    const { userId, tmdbID } = validateReviewRequest(req);
+    const { title, comment, spoiler } = req.body;
+
+    if (!title || !comment) {
+      return res
+        .status(400)
+        .json({ message: "Title and comment type are required" });
+    }
+
+    const updatedReview = await updateReviewHelper(
+      userId,
+      tmdbID,
+      title,
+      comment,
+      spoiler
+    );
+
+    res.status(200).json(updatedReview);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
