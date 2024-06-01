@@ -11,6 +11,11 @@ const ratingSchema = new Schema<IRating>(
       type: Number,
       required: true,
     },
+    mediaType: {
+      type: String,
+      enum: ["movie", "tv"],
+      required: true,
+    },
     rating: {
       type: Number,
       required: true,

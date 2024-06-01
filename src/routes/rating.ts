@@ -3,12 +3,16 @@ import {
   createOrUpdateUserRating,
   deleteUserRating,
   getUserRating,
+  getMediaRatings,
 } from "../controllers/rating.controller";
+import tokenMiddleware from "../middlewares/token.middleware";
 
 const ratingRoutes = express.Router();
 
 ratingRoutes.get("/get-user-rating", getUserRating);
-ratingRoutes.post("/create-or-update-user-rating", createOrUpdateUserRating);
-ratingRoutes.delete("/delete-user-rating", deleteUserRating);
+ratingRoutes.get("/get-media-ratings", getMediaRatings);
+
+ratingRoutes.post("/create-or-update-rating", tokenMiddleware, createOrUpdateUserRating);
+ratingRoutes.delete("/delete-rating", tokenMiddleware, deleteUserRating);
 
 export default ratingRoutes;
