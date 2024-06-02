@@ -10,6 +10,7 @@ import watchlistRoutes from "./routes/watchlist";
 import listRoutes from "./routes/list";
 import reviewRoutes from "./routes/review";
 import ratingRoutes from "./routes/rating";
+import apiProxy from "./proxy/api.proxy";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/watchlist", watchlistRoutes);
 app.use("/list", listRoutes);
 app.use("/review", reviewRoutes);
 app.use("/rating", ratingRoutes);
+app.use("/tmdb-api", apiProxy);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

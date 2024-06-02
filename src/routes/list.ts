@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getList,
   addToList,
   createList,
   getUserLists,
@@ -10,6 +11,7 @@ import tokenMiddleware from "../middlewares/token.middleware";
 const listRoutes = express.Router();
 
 listRoutes.get("/get-lists", getUserLists);
+listRoutes.get("/get-list", getList);
 listRoutes.post("/create-list", tokenMiddleware, createList);
 
 listRoutes.put("/add-to-list", tokenMiddleware, addToList);

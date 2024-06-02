@@ -3,11 +3,12 @@ import userSchema from "../schemas/user.schema";
 import listSchema from "../schemas/list.schema";
 import { IAuthReq } from "../types/IAuthReq";
 import {
-  addMediaToList,
-  createNewList,
-  findListById,
-  getLists,
-  removeMediaFromList,
+  addMediaToListHelper,
+  createNewListHelper,
+  findListByIdhelper,
+  getListHelper,
+  getListsHelper,
+  removeMediaFromListHelper,
   validateListRequest,
 } from "../helpers/list.helper";
 
@@ -26,9 +27,30 @@ export const getUserLists = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const lists = await getLists(user._id);
+    const lists = await getListsHelper(user._id);
 
     res.status(200).json(lists);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get List
+export const getList = async (req: Request, res: Response) => {
+  try {
+    const { listId } = validateListRequest(req);
+
+    if (!listId) {
+      return res.status(400).json({ message: "List ID is required" });
+    }
+
+    const list = await getListHelper(listId);
+
+    if (!list) {
+      return res.status(404).json({ message: "List not found" });
+    }
+
+    res.status(200).json(list);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -47,7 +69,7 @@ export const createList = async (req: IAuthReq, res: Response) => {
       description,
     });
 
-    const list = await createNewList(listData);
+    const list = await createNewListHelper(listData);
 
     res.status(200).json(list);
   } catch (error: any) {
@@ -66,14 +88,14 @@ export const addToList = async (req: IAuthReq, res: Response) => {
         .json({ message: "List ID, TMDB ID, and media type are required" });
     }
 
-    const list = await findListById(listId, userId!);
+    const list = await findListByIdhelper(listId, userId!);
 
     if (!list) {
       return res.status(404).json({ message: "List not found" });
     }
 
     const mediaItem = { tmdbID, mediaType, dateAdded: new Date() };
-    const updatedList = await addMediaToList(list, mediaItem);
+    const updatedList = await addMediaToListHelper(list, mediaItem);
 
     res.status(200).json(updatedList);
   } catch (error: any) {
@@ -92,13 +114,13 @@ export const removeFromList = async (req: IAuthReq, res: Response) => {
         .json({ message: "List ID and TMDB ID are required" });
     }
 
-    const list = await findListById(listId, userId!);
+    const list = await findListByIdhelper(listId, userId!);
 
     if (!list) {
       return res.status(404).json({ message: "List not found" });
     }
 
-    const updatedList = await removeMediaFromList(list, tmdbID);
+    const updatedList = await removeMediaFromListHelper(list, tmdbID);
 
     res.status(200).json(updatedList);
   } catch (error: any) {

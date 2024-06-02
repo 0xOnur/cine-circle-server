@@ -24,20 +24,24 @@ export const validateListRequest = (req: IAuthReq) => {
   };
 };
 
-export const getLists = async (userId: string) => {
+export const getListsHelper = async (userId: string) => {
   return await listSchema.find({ userId });
 };
 
-export const findListById = async (listId: string, userId: string) => {
+export const getListHelper = async (listId: string) => {
+  return await listSchema.findById(listId).populate("userId", "-password");
+};
+
+export const findListByIdhelper = async (listId: string, userId: string) => {
   return await listSchema.findOne({ _id: listId, userId });
 };
 
-export const createNewList = async (list: Document & IList) => {
+export const createNewListHelper = async (list: Document & IList) => {
   await list.save();
   return list;
 };
 
-export const addMediaToList = async (
+export const addMediaToListHelper = async (
   list: Document & IList,
   mediaItem: IMedia
 ) => {
@@ -46,7 +50,7 @@ export const addMediaToList = async (
   return list;
 };
 
-export const removeMediaFromList = async (
+export const removeMediaFromListHelper = async (
   list: Document & IList,
   tmdbID: string
 ) => {
